@@ -30,12 +30,10 @@ class MainWindow(QMainWindow):
 
     def on_enter_clicked(self):
         entered_text = self.input.text()
-        QMessageBox.information(self, f"Book Title Here{entered_text}", "Book Prices Here")
+        QMessageBox.information(self, f"{entered_text}", "Book Prices Here")
         
     
    
-
-
        
 if __name__=="__main__":
     app = QApplication()
