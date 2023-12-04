@@ -8,7 +8,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        
         self.setWindowTitle("Book Finder")
         self.resize(300,40)
 
@@ -32,9 +31,6 @@ class MainWindow(QMainWindow):
         entered_text = self.input.text()
         QMessageBox.information(self, f"{entered_text}", "Book Prices Here")
         
-    
-   
-       
 if __name__=="__main__":
     app = QApplication()
     window = MainWindow()
