@@ -31,8 +31,16 @@ class Scraper(ABC):
     def items(self):
         pass
 
+    def printResults():
+        for key in Scraper.results.keys():
+            print(key)
+            for item in Scraper.results[key]:
+                print(item)
+            print()
+
     def run() -> None:
         runThreads(Scraper.threads)
+        Scraper.printResults()
 
 class Amazon(Scraper):
     
