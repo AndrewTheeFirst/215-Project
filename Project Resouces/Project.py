@@ -1,6 +1,6 @@
 #Andrew Patton
 #Christopher Pillgreen
-
+from Scraper import Amazon
 from PySide6.QtWidgets import \
      QApplication, QMainWindow, QPushButton, QLabel, QLineEdit, QVBoxLayout, QAbstractItemView, QMessageBox, QWidget, QListWidget
 from Scraper import main, Amazon
