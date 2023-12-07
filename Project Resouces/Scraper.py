@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import requests
 
 class Amazon:
-class Amazon:
+
     threads = []
     def __init__(self, isbn):
         def t():
