@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.input)
         
 
-        addButton = SearchButton('Search', self)
+        addButton = QPushButton('Search')
         addButton.clicked.connect(self.on_enter_clicked)  
         layout.addWidget(addButton)
         
@@ -33,22 +33,17 @@ class MainWindow(QMainWindow):
     def on_enter_clicked(self):
         entered_text = self.input.text()
         QMessageBox.information(self, f"{entered_text}", "Book Prices Here")
-
-class SearchButton(QPushButton):
-    def __init__(self, text: str, parentWindow: MainWindow):
-        super().__init__(text)
-        self.parentWindow = parentWindow
-        self.clicked.connect(self.onClick)
-
+    
     def onClick(self):
-        print('test')
-        isbn = self.parentWindow.input.text()
+        isbn = self.input.text()
         Amazon(isbn)
         for thread in Amazon.threads:
             thread.start()
         for thread in Amazon.threads:
             thread.join()
-    pass
+
+
+
 if __name__=="__main__":
     app = QApplication()
     window = MainWindow()
