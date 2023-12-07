@@ -35,6 +35,7 @@ class Scraper(ABC):
         runThreads(Scraper.threads)
 
 class Amazon(Scraper):
+    
     url = 'https://www.amazon.com/s?i=stripbooks&rh=p_66%3A{}&s=relevanceexprank&Adv-Srch-Books-Submit.x=36&Adv-Srch-Books-Submit.y=12&unfiltered=1&ref=sr_adv_b'
 
     def __init__(self, isbn: int):
