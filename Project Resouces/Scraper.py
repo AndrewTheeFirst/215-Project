@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement #referenced but not used
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import requests
 
 class Amazon:
     threads = []
@@ -73,23 +74,29 @@ class Amazon:
             self.driver.back()
         return results
 
-
+def Barnes(isbn):
+    
+    def __init__(self):
+        pass
+    pass
 
 
 if __name__ == '__main__':
     '''some example driver code that takes an isbn
       and prints the parsed information from the results
     '''
+# def main():
+#     # isbn = 9780545091022
+#     # isbn = 9780062024022
+#     isbn = 9780060194994
+#     # isbn = 9780199608522
+#     isbns = [9780060194994, 9780199608522, 9780062024022, 9780545091022]
+#     for isbn in isbns:
+#         Amazon(isbn)
+#     for thread in Amazon.threads:
+#         thread.start()
+#     for thread in Amazon.threads:
+#         thread.join()
+#     print('done')
 
-    # isbn = 9780545091022
-    # isbn = 9780062024022
-    isbn = 9780060194994
-    # isbn = 9780199608522
-    isbns = [9780060194994, 9780199608522, 9780062024022, 9780545091022]
-    for isbn in isbns:
-        Amazon(isbn)
-    for thread in Amazon.threads:
-        thread.start()
-    for thread in Amazon.threads:
-        thread.join()
-    print('done')
+Barnes()
