@@ -125,17 +125,44 @@ class Barnes(Scraper):
     def __init__(self, isbn: int):
         def t():
             '''func to be run simultaneously with other subclasses of Scraper'''
-            pass
-        Scraper.threads.append(t)
+        
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(isbn)
+    
+    
+
+            
+
+        Scraper.results['Barnes'] = self.parse()
+        Scraper.threads.append(Thread(target = t))
+
 
     def search(self, isbn: int) -> None:
         '''initializes page'''
-        return
+        self.driver.get(Barnes.url)
+        searchBar = self.driver.find_element(By.TAG_NAME, 'nav').find_element(By.TAG_NAME, 'input')
+        searchBar.send_keys(str(isbn))
+        button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
+        button.click()
+
+
+    
+
 
     def parse(self) -> list[list[str, str]]:
         '''returns [[Barnes&Noble, Format, Price], ...]'''
         results = []
+
+        
+        prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'format-price')]
+        types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'span-with-normal-white-space')]
+                 
+        for price, book_type in zip(prices, types):
+            results.append([book_type, price])
+
         return results
+
     
     def parseResults(self) -> list[list[str, str, str]]:
         '''returns [[Amazon, Format, Price], ...]'''
@@ -152,6 +179,6 @@ class Title:
 
 
 
-Amazon(9780060194994)
+Barnes(9780545091022)
 Scraper.run()
-
+print(Scraper.results)
