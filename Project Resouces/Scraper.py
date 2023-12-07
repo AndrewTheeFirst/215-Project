@@ -4,6 +4,7 @@
 # from bs4 import BeautifulSoup
 # import requests
 import threading
+from functools import partial
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -32,14 +33,15 @@ class Amazon:
         self.driver.get(link)
 
     def parseSearch(self) -> list[list[str]]:
-        prices = [whole.text for whole in self.driver.find_element(
-            By.CLASS_NAME, 'puisg-col-inner').find_element(
-            By.CLASS_NAME, 'a-offscreen')]
+        wholes = [whole.text for whole in self.driver.find_elements(
+            By.CLASS_NAME, 'a-price-whole')]
+        fractions = [fraction.text for fraction in self.driver.find_elements(
+            By.CLASS_NAME, 'a-price-fraction')]
         types = [type.text for type in self.driver.find_elements(
             By.CLASS_NAME,'a-size-base.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-bold')]
         results = []
-        for items in zip(types, prices):
-            results.append([items[0], items[1]])
+        for items in zip(wholes, fractions, types):
+            results.append([items[2], f'{items[0]}.{items[1]}'])
         else:
             if len(results) == 0:
                 print('Amazon has no such book')
