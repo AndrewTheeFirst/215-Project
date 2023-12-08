@@ -146,10 +146,6 @@ class Barnes(Scraper):
         button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
         button.click()
 
-
-    
-
-
     def parse(self) -> list[list[str, str]]:
         '''returns [[Barnes&Noble, Format, Price], ...]'''
         results = []
@@ -179,6 +175,6 @@ class Title:
 
 
 
-Barnes(9780545091022)
+Amazon(9780060888695)
 Scraper.run()
 print(Scraper.results)
