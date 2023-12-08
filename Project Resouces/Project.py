@@ -1,15 +1,13 @@
 #Andrew Patton
 #Christopher Pillgreen
-from Scraper import Amazon
+from Scraper import Scraper
 from PySide6.QtWidgets import \
-     QApplication, QMainWindow, QPushButton, QLabel, QLineEdit, QVBoxLayout, QAbstractItemView, QMessageBox, QWidget, QListWidget
-from Scraper import main, Amazon
-import threading
+     QApplication, QMainWindow, QPushButton, QLabel, QLineEdit, QVBoxLayout, QMessageBox, QWidget, QListWidget
 
-class MainWindow(QMainWindow):
+
+class StartWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Book Finder")
         self.resize(300,40)
 
@@ -19,7 +17,6 @@ class MainWindow(QMainWindow):
         self.input.setPlaceholderText("Please enter an ISBN Number")
         layout.addWidget(self.input)
         
-
         addButton = QPushButton('Search')
         addButton.clicked.connect(self.on_enter_clicked)  
         layout.addWidget(addButton)
@@ -32,20 +29,19 @@ class MainWindow(QMainWindow):
 
     def on_enter_clicked(self):
         entered_text = self.input.text()
+        print(Scraper.getResults(entered_text))
+        print('done')
         QMessageBox.information(self, f"{entered_text}", "Book Prices Here")
     
     def onClick(self):
-        isbn = self.input.text()
-        Amazon(isbn)
-        for thread in Amazon.threads:
-            thread.start()
-        for thread in Amazon.threads:
-            thread.join()
+        pass
 
+class MainWindow:
+    pass
 
 
 if __name__=="__main__":
     app = QApplication()
-    window = MainWindow()
+    window = StartWindow()
     window.show()
     app.exec()
