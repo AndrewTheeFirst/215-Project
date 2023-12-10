@@ -46,6 +46,8 @@ class Scraper(ABC):
         Title(isbn)
         Amazon(isbn)
         Barnes(isbn)
+        Google(isbn)
+        # Million(isbn)
         runThreads(Scraper.threads)
         return Scraper.results
 
@@ -142,8 +144,31 @@ class Barnes(Scraper):
             results.append([book_type, price])
         return results
 
-class Google:
-    pass
+class Google(Scraper):
+    url = 'https://play.google.com/store/books?hl=en&gl=US'
+
+    def __init__(self, title):
+        def t():        
+            self.driver = webdriver.Chrome()
+            self.driver.implicitly_wait(1)
+            self.search(title)
+            Scraper.results['Google'] = self.parse()
+        Scraper.threads.append(Thread(target = t))
+
+    def search(self, title: str) -> None:
+        self.driver.get(Google.url)
+        searchBar = self.driver.find_element(By.CLASS_NAME, 'VfPpkd-Bz112c-LgbsSe yHy1rc eT1oJ mN1ivc"').find_element(By.CLASS_NAME, 'HWAcU')
+        searchBar.send_keys(str(title))
+        button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
+        button.click()
+
+    def parse(self) -> list[list[str, str]]:
+        results = []
+        prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'format-price')]
+        types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'span-with-normal-white-space')]
+        for price, book_type in zip(prices, types):
+            results.append([book_type, price])
+        return results
 
 class Million:
     pass
@@ -156,13 +181,13 @@ class Title(Scraper):
                 self.driver = webdriver.Chrome()
                 self.driver.implicitly_wait(1)
                 self.search(isbn)
-                Scraper.title = self.parse()
+                #Scraper.title = self.parse()
+                self.title = self.parse()
             Scraper.threads.append(Thread(target = t))
 
     def search(self, isbn: int) -> None:
         self.driver.get(Title.url.format(isbn))
 
-    def parse(self) -> str:
-        return self.driver.find_element(
-            By.CLASS_NAME, 'block.block-core.block-page-title-block').text
+Scraper.getResults(9780060888695)
+print(Scraper.results)
 
