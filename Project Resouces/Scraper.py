@@ -141,26 +141,23 @@ class Barnes(Scraper):
 
 class Google(Scraper):
     url = 'https://play.google.com/store/books?hl=en&gl=US'
-    def __init__(self, isbn: int):
-        def t():
-            '''func to be run simultaneously with other subclasses of Scraper'''
-        
+
+    def __init__(self, title):
+        def t():        
             self.driver = webdriver.Chrome()
             self.driver.implicitly_wait(1)
-            self.search(isbn)
-            Scraper.results['Barnes'] = self.parse()
+            self.search(title)
+            Scraper.results['Google'] = self.parse()
         Scraper.threads.append(Thread(target = t))
 
-    def search(self, isbn: int) -> None:
-        '''initializes page'''
-        self.driver.get(Barnes.url)
-        searchBar = self.driver.find_element(By.TAG_NAME, 'nav').find_element(By.TAG_NAME, 'input')
-        searchBar.send_keys(str(isbn))
+    def search(self, title: str) -> None:
+        self.driver.get(Google.url)
+        searchBar = self.driver.find_element(By.CLASS_NAME, 'VfPpkd-Bz112c-LgbsSe yHy1rc eT1oJ mN1ivc"').find_element(By.CLASS_NAME, 'HWAcU')
+        searchBar.send_keys(str(title))
         button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
         button.click()
 
     def parse(self) -> list[list[str, str]]:
-        '''returns [[Format, Price], ...]'''
         results = []
         prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'format-price')]
         types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'span-with-normal-white-space')]
@@ -176,14 +173,15 @@ class Title(Scraper):
                 self.driver = webdriver.Chrome()
                 self.driver.implicitly_wait(1)
                 self.search(isbn)
-                Scraper.title = self.parse()
+                #Scraper.title = self.parse()
+                self.title = self.parse()
             Scraper.threads.append(Thread(target = t))
 
     def search(self, isbn: int) -> None:
         self.driver.get(Title.url.format(isbn))
 
 
-Amazon(9780060888695)
+Google(9780060888695)
 Scraper.run()
 print(Scraper.results)
 
