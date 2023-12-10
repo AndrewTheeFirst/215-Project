@@ -15,7 +15,10 @@ def elementExists():
 
 class Scraper(ABC):
     threads = []
-    results = {}
+    results = {'amazon': [['hardcover', 9.99], ['hardcover', 9.99]],
+               'barnes': [['hardcover', 9.99], ['hardcover', 9.99]],
+               'books': [['hardcover', 9.99], ['hardcover', 9.99]],
+               'google': [['hardcover', 9.99], ['hardcover', 9.99]]}
     title = ''
 
     @abstractmethod
@@ -139,6 +142,12 @@ class Barnes(Scraper):
             results.append([book_type, price])
         return results
 
+class Google:
+    pass
+
+class Million:
+    pass
+
 class Title(Scraper):
     url = 'https://isbndb.com/book/{}'
     
@@ -156,4 +165,4 @@ class Title(Scraper):
     def parse(self) -> str:
         return self.driver.find_element(
             By.CLASS_NAME, 'block.block-core.block-page-title-block').text
-    
+
