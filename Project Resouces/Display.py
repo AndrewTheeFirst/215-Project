@@ -1,23 +1,41 @@
 #Andrew Patton
 #Christopher Pillgreen
 from PySide6.QtWidgets import QApplication, QMainWindow # UI handler
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QSpacerItem, QWidget # layout manipulation
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QSpacerItem, QWidget # layout manipulation
 from PySide6.QtWidgets import QPushButton, QLabel, QLineEdit # widgets
-from PySide6.QtCore import QSize #misc
+from PySide6.QtCore import QSize, Qt # sizing and alignment
+from PySide6.QtCore import QRunnable, QObject, QThreadPool, Signal, QThread # managing threads
 from PySide6.QtGui import QFont, QMovie, QPixmap # fonts, gifs, images
-from Scraper import Scraper # retrieve data
+import Scraper # data class
 
-titleFont = QFont()
-titleFont.setPointSize(75)
-titleFont.setFamily('Garamond')
+TITLE = QFont()
+TITLE.setPointSize(75)
+TITLE.setFamily('Garamond')
 
-subTitleFont = QFont()
-subTitleFont.setPointSize(20)
-subTitleFont.setFamily('Garamond')
+SUBTITLE = QFont()
+SUBTITLE.setPointSize(20)
+SUBTITLE.setFamily('Garamond')
 
-subFont = QFont()
-subFont.setPointSize(15)
-subFont.setFamily('Garamond')
+SUB = QFont()
+SUB.setPointSize(15)
+SUB.setFamily('Garamond')
+
+class WorkerSignal():
+    pass
+
+class Worker(QObject):
+    def __init__(self, isbn):
+        super().__init__()
+        self.isbn = isbn
+
+    def task(self):
+        Scraper.Scraper.run(self.isbn)
+
+class Manager(QThread):
+
+    def run(self, isbn):
+        worker = Worker(isbn)
+        worker.task()
 
 class StartWindow(QMainWindow):
 
@@ -47,7 +65,7 @@ class StartWindow(QMainWindow):
         titleCard.addWidget(imageContainer)
     
         programName = QLabel('Book Finder')
-        programName.setFont(titleFont)
+        programName.setFont(TITLE)
         titleCard.addWidget(programName)
         return titleCard
 
@@ -56,11 +74,11 @@ class StartWindow(QMainWindow):
 
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText("Please enter an ISBN Number")
-        self.searchBar.setFont(subTitleFont)
+        self.searchBar.setFont(SUBTITLE)
         subInterface.addWidget(self.searchBar)
 
         searchButton = QPushButton('Search')
-        searchButton.setFont(subTitleFont)
+        searchButton.setFont(SUBTITLE)
         searchButton.clicked.connect(self.search)
         subInterface.addWidget(searchButton)
 
@@ -74,7 +92,6 @@ class StartWindow(QMainWindow):
         self.hide()
         self.relative.startLoading(self.searchBar.text())
         
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -90,20 +107,21 @@ class MainWindow(QMainWindow):
         titleCard.addWidget(imageContainer)
     
         programName = QLabel('Book Finder')
-        programName.setFont(subFont)
+        programName.setFont(SUB)
         titleCard.addWidget(programName)
+
         return titleCard
     
-    def createNavBar(self) -> QHBoxLayout:
+    def _createNavBar(self) -> QHBoxLayout:
         navBar = QHBoxLayout()
 
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText('Please enter an ISBN Number')
-        self.searchBar.setFont(subFont)
+        self.searchBar.setFont(SUB)
         self.searchBar.setFixedSize(QSize(250, 30))
 
         searchButton = QPushButton('Search')
-        searchButton.setFont(subFont)
+        searchButton.setFont(SUB)
         searchButton.setFixedSize(75, 35)
 
         titleCard = self._createTitleCard()
@@ -114,39 +132,43 @@ class MainWindow(QMainWindow):
 
         return navBar
     
-    def createHeader(self) -> QHBoxLayout:
-        header = QHBoxLayout()
-        header.addSpacerItem(QSpacerItem(50, 35))
+    def _createHeader(self) -> QHBoxLayout:
+        header = QVBoxLayout() 
+
+        bookTitle = QLabel(Scraper.Scraper.title)
+        bookTitle.setFont(TITLE)
+        bookTitle.setAlignment(Qt.AlignCenter)
+        header.addWidget(bookTitle)
+
+        subHeader = QGridLayout()
         venders = 'Amazon-Barnes&Nobel-Books a Million-Google'.split('-')
+        
+        index = 0
         for vender in venders:
+            index += 1
             venderHead = QLabel(vender)
-            venderHead.setFont(subTitleFont)
-            header.addWidget(venderHead)
-        header.addSpacerItem(QSpacerItem(50, 35))
-        header.setSpacing(50)
+            venderHead.setFont(SUBTITLE)
+            venderHead.setFixedWidth(200)
+            venderHead.setAlignment(Qt.AlignLeft)
+            subHeader.addWidget(venderHead, 1, index)
+
+        header.addLayout(subHeader)
+        
         return header
 
-    def createStacks(self) -> QHBoxLayout:
-        stacks = QHBoxLayout()
-        stacks.addSpacerItem(QSpacerItem(50, 50))
-        for vender in Scraper.results.keys():
-            column = QVBoxLayout()
-            for item in Scraper.results[vender]:
-                container = QHBoxLayout()
-
-                formatLabel = QLabel(item[0])
-                formatLabel.setFont(subFont)
-                formatLabel.setFixedSize(100, 25) 
-                container.addWidget(formatLabel)
-
-                priceLabel = QLabel(str(item[1]))
-                priceLabel.setFont(subFont)  
-                priceLabel.setFixedSize(100, 25) 
-                container.addWidget(priceLabel)
-
-                column.addLayout(container)
-            stacks.addLayout(column)
-        stacks.addSpacerItem(QSpacerItem(50, 50))
+    def _createStacks(self) -> QHBoxLayout:
+        stacks = QGridLayout()
+        col = 0
+        for vender in Scraper.Scraper.results.keys():
+            row = 0
+            for item in Scraper.Scraper.results[vender]:
+                formatLabel = QLabel(f'{item[0]}: {item[1]}')
+                formatLabel.setFont(SUB)
+                formatLabel.setFixedWidth(200)
+                formatLabel.setAlignment(Qt.AlignLeft)
+                stacks.addWidget(formatLabel, row, col)
+                row += 1
+            col += 1
         return stacks
 
     def startLoading(self, isbn):
@@ -156,15 +178,17 @@ class MainWindow(QMainWindow):
         loadingContainer.setMovie(self.loading)
         self.setCentralWidget(loadingContainer)
         self.loading.start()
-        Scraper.getResults(isbn)
+        manager = Manager()
+        manager.run(isbn)
+        manager.finished.connect(self.stopLoading)
 
-    def stopLoading(self):
+    def stopLoading(self): #########init of window##########
         self.loading.stop()
-        self.setFixedSize(775, 500)
+        self.setFixedSize(800, 500)
         mainInterface = QVBoxLayout()
-        mainInterface.addLayout(self.createNavBar())
-        mainInterface.addLayout(self.createHeader())
-        mainInterface.addLayout(self.createStacks())
+        mainInterface.addLayout(self._createNavBar())
+        mainInterface.addLayout(self._createHeader())
+        mainInterface.addLayout(self._createStacks())
         widget = QWidget()
         widget.setLayout(mainInterface)
         self.setCentralWidget(widget)
@@ -172,7 +196,7 @@ class MainWindow(QMainWindow):
     def search(self):
         pass
 
-'''
+
 class Toggle(QMainWindow):
     def __init__(self, main: MainWindow):
         super().__init__()
@@ -197,16 +221,18 @@ class Toggle(QMainWindow):
 
     def off(self):
         self.main.stopLoading()
-'''
 
 if __name__ == '__main__':
     app = QApplication()
 
-    main = MainWindow()
-
     start = StartWindow()
-    start.setRelative(main)
     start.show()
 
+    main = MainWindow()
+    start.setRelative(main)
+
+    switch = Toggle(main)
+    switch.show()
+
     app.exec()
-    
+    # 9780062024022
