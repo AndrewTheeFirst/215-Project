@@ -156,6 +156,7 @@ class MainWindow(QMainWindow):
         loadingContainer.setMovie(self.loading)
         self.setCentralWidget(loadingContainer)
         self.loading.start()
+        Scraper.getResults(isbn)
 
     def stopLoading(self):
         self.loading.stop()
@@ -208,3 +209,4 @@ if __name__ == '__main__':
     start.show()
 
     app.exec()
+    

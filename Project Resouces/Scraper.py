@@ -185,6 +185,9 @@ class Title(Scraper):
                 self.title = self.parse()
             Scraper.threads.append(Thread(target = t))
 
+    def parse(self):
+        pass
+
     def search(self, isbn: int) -> None:
         self.driver.get(Title.url.format(isbn))
 
