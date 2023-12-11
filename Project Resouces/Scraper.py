@@ -4,21 +4,16 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-def runThreads(threads: list[Thread]):
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-
 def elementExists():
     pass
 
 class Scraper(ABC):
-    threads = []
-    results = {'amazon': [['hardcover', 9.99], ['hardcover', 9.99]],
-               'barnes': [['hardcover', 9.99], ['hardcover', 9.99]],
-               'books': [['hardcover', 9.99], ['hardcover', 9.99]],
-               'google': [['hardcover', 9.99], ['hardcover', 9.99]]}
+
+    results = {'Amazon':[['', '']],
+               'Barnes':[['', '']],
+               'Books':[['', '']],
+               'Google':[['', '']]}
+
     title = ''
 
     @abstractmethod
@@ -33,36 +28,20 @@ class Scraper(ABC):
     def parse(self) -> list[list[str]]:
         pass
 
-    def printResults():
-        print(f'{Scraper.title}\n')
-        for key in Scraper.results.keys():
-            print(key)
-            for item in Scraper.results[key]:
-                print(item)
-            print()
-
-    def getResults(isbn) -> dict[str, list[list[str, str]]]:
-        ''''''
+    def run(isbn):
         Title(isbn)
         Amazon(isbn)
         Barnes(isbn)
-        Google(isbn)
-        # Million(isbn)
-        runThreads(Scraper.threads)
-        return Scraper.results
 
 class Amazon(Scraper):
     url = 'https://www.amazon.com/s?i=stripbooks&rh=p_66%3A{}&s=relevanceexprank&Adv-Srch-Books-Submit.x=36&Adv-Srch-Books-Submit.y=12&unfiltered=1&ref=sr_adv_b'
     
     def __init__(self, isbn: int):
-        def t():
-            '''func to be run simultaneously with other subclasses of Scraper'''
-            self.driver = webdriver.Chrome()
-            self.driver.implicitly_wait(1)
-            self.search(isbn)
-            Scraper.results['Amazon'] = self.parse()
-            Scraper.results['Amazon'] += self.parseResults()
-        Scraper.threads.append(Thread(target = t))
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(isbn)
+        Scraper.results['Amazon'] = self.parse()
+        Scraper.results['Amazon'] += self.parseResults()
 
     def search(self, isbn: int) -> None:
         '''initializes page'''
@@ -118,14 +97,10 @@ class Barnes(Scraper):
     url = 'https://www.barnesandnoble.com/'
     
     def __init__(self, isbn: int):
-        def t():
-            '''func to be run simultaneously with other subclasses of Scraper'''
-        
-            self.driver = webdriver.Chrome()
-            self.driver.implicitly_wait(1)
-            self.search(isbn)
-            Scraper.results['Barnes'] = self.parse()
-        Scraper.threads.append(Thread(target = t))
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(isbn)
+        Scraper.results['Barnes'] = self.parse()
 
     def search(self, isbn: int) -> None:
         '''initializes page'''
@@ -148,12 +123,10 @@ class Google(Scraper):
     url = 'https://play.google.com/store/books?hl=en&gl=US'
 
     def __init__(self, title):
-        def t():        
-            self.driver = webdriver.Chrome()
-            self.driver.implicitly_wait(1)
-            self.search(title)
-            Scraper.results['Google'] = self.parse()
-        Scraper.threads.append(Thread(target = t))
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(title)
+        Scraper.results['Google'] = self.parse()
 
     def search(self, title: str) -> None:
         self.driver.get(Google.url)
@@ -170,24 +143,33 @@ class Google(Scraper):
             results.append([book_type, price])
         return results
 
-class Million:
-    pass
+class Million(Scraper):
+    url = ''
+
+    def __init__(self, isbn: int):
+        pass
+
+    def search(self, isbn: int) -> None:
+        pass
+
+    def parse(self) -> list[list[str]]:
+        pass
 
 class Title(Scraper):
     url = 'https://isbndb.com/book/{}'
     
     def __init__(self, isbn):
-            def t():
-                self.driver = webdriver.Chrome()
-                self.driver.implicitly_wait(1)
-                self.search(isbn)
-                #Scraper.title = self.parse()
-                self.title = self.parse()
-            Scraper.threads.append(Thread(target = t))
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(isbn)
+        Scraper.title = self.parse()
 
     def search(self, isbn: int) -> None:
         self.driver.get(Title.url.format(isbn))
 
-Scraper.getResults(9780060888695)
-print(Scraper.results)
-
+    def parse(self):
+        title = self.driver.find_element(
+            By.CLASS_NAME, 'region.region-page-title').find_element(
+            By.TAG_NAME, 'h1').text
+        return title
+    
