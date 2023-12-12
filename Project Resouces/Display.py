@@ -101,12 +101,13 @@ class MainWindow(QMainWindow):
         titleCard = QHBoxLayout()
 
         image = QPixmap('Project Resouces\\bookStackIcon.png')
-        image = image.scaledToHeight(30)
+        image = image.scaledToWidth(50)
         imageContainer = QLabel()
         imageContainer.setPixmap(image)
         titleCard.addWidget(imageContainer)
     
         programName = QLabel('Book Finder')
+        programName.setFixedWidth(150)
         programName.setFont(SUB)
         titleCard.addWidget(programName)
 
@@ -118,17 +119,17 @@ class MainWindow(QMainWindow):
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText('Please enter an ISBN Number')
         self.searchBar.setFont(SUB)
-        self.searchBar.setFixedSize(QSize(250, 30))
+        self.searchBar.setFixedSize(QSize(200, 50))
 
         searchButton = QPushButton('Search')
         searchButton.setFont(SUB)
-        searchButton.setFixedSize(75, 35)
+        searchButton.setFixedSize(100, 55)
 
         titleCard = self._createTitleCard()
         navBar.addLayout(titleCard)
         navBar.addWidget(self.searchBar)
         navBar.addWidget(searchButton)
-        navBar.addSpacerItem(QSpacerItem(300, 35))
+        navBar.addSpacerItem(QSpacerItem(600, 50))
 
         return navBar
     
@@ -148,7 +149,7 @@ class MainWindow(QMainWindow):
             index += 1
             venderHead = QLabel(vender)
             venderHead.setFont(SUBTITLE)
-            venderHead.setFixedWidth(200)
+            venderHead.setFixedSize(QSize(250, 100))
             venderHead.setAlignment(Qt.AlignLeft)
             subHeader.addWidget(venderHead, 1, index)
 
@@ -164,7 +165,7 @@ class MainWindow(QMainWindow):
             for item in Scraper.Scraper.results[vender]:
                 formatLabel = QLabel(f'{item[0]}: {item[1]}')
                 formatLabel.setFont(SUB)
-                formatLabel.setFixedWidth(200)
+                formatLabel.setFixedWidth(250)
                 formatLabel.setAlignment(Qt.AlignLeft)
                 stacks.addWidget(formatLabel, row, col)
                 row += 1
@@ -184,7 +185,7 @@ class MainWindow(QMainWindow):
 
     def stopLoading(self): #########init of window##########
         self.loading.stop()
-        self.setFixedSize(800, 500)
+        self.setFixedSize(1000, 500)
         mainInterface = QVBoxLayout()
         mainInterface.addLayout(self._createNavBar())
         mainInterface.addLayout(self._createHeader())
@@ -236,3 +237,4 @@ if __name__ == '__main__':
 
     app.exec()
     # 9780062024022
+    # 9780199608522

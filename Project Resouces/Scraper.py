@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 from threading import Thread
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-def elementExists():
-    pass
+agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+OPTIONS = Options()
+OPTIONS.add_argument(f'user-agent={agent}')
+OPTIONS.add_argument('--headless=new')
+OPTIONS.add_argument('--window-size=1920,1080')
 
 class Scraper(ABC):
 
@@ -105,6 +109,7 @@ class Barnes(Scraper):
     def search(self, isbn: int) -> None:
         '''initializes page'''
         self.driver.get(Barnes.url)
+        self.driver.get_screenshot_as_file("screenshot.png")
         searchBar = self.driver.find_element(By.TAG_NAME, 'nav').find_element(By.TAG_NAME, 'input')
         searchBar.send_keys(str(isbn))
         button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
