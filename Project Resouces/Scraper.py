@@ -135,30 +135,42 @@ class Google(Scraper):
 
     def search(self, title: str) -> None:
         self.driver.get(Google.url)
-        searchBar = self.driver.find_element(By.CLASS_NAME, 'VfPpkd-Bz112c-LgbsSe yHy1rc eT1oJ mN1ivc"').find_element(By.CLASS_NAME, 'HWAcU')
+        searchBar = self.driver.find_element(By.CLASS_NAME, 'google-material-icons r9optf').find_element(By.CLASS_NAME, 'HWAcU')
         searchBar.send_keys(str(title))
-        button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
-        button.click()
+        searchBar.send_keys(Keys.RETURN)
 
     def parse(self) -> list[list[str, str]]:
         results = []
-        prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'format-price')]
-        types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'span-with-normal-white-space')]
+        prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'VfPpfd VixbEe')]
+        types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'kcen6d')]
         for price, book_type in zip(prices, types):
             results.append([book_type, price])
         return results
 
 class Million(Scraper):
-    url = ''
+    url = 'https://www.booksamillion.com/'
 
     def __init__(self, isbn: int):
-        pass
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(1)
+        self.search(isbn)
+        Scraper.results['Books-A-Million'] = self.parse()
+
 
     def search(self, isbn: int) -> None:
-        pass
+        self.driver.get(Barnes.url)
+        searchBar = self.driver.find_element(By.CLASS_NAME, 'search-wrapper').find_element(By.TAG_NAME, 'ui-autocomplete-input')
+        searchBar.send_keys(str(isbn))
+        button = self.driver.find_element(By.CLASS_NAME,'material-icons md-light')
+        button.click()
 
     def parse(self) -> list[list[str]]:
-        pass
+        results = []
+        prices = [price.text for price in self.driver.find_elements(By.CLASS_NAME, 'our-price')]
+        types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'productInfoText')]
+        for price, book_type in zip(prices, types):
+            results.append([book_type, price])
+        return results
 
 class Title(Scraper):
     url = 'https://isbndb.com/book/{}'
@@ -168,6 +180,9 @@ class Title(Scraper):
         self.driver.implicitly_wait(1)
         self.search(isbn)
         Scraper.title = self.parse()
+
+    def parse(self):
+        pass
 
     def search(self, isbn: int) -> None:
         self.driver.get(Title.url.format(isbn))
