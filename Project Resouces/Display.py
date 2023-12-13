@@ -12,16 +12,22 @@ from PySide6.QtGui import QFont, QMovie, QPixmap # fonts, gifs, images
 import Scraper # data class
 
 TITLE = QFont()
-TITLE.setPointSize(75)
-TITLE.setFamily('Garamond')
+TITLE.setPointSize(40)
+TITLE.setFamily('Times New Roman')
 
 SUBTITLE = QFont()
 SUBTITLE.setPointSize(20)
-SUBTITLE.setFamily('Garamond')
+SUBTITLE.setFamily('Times New Roman')
+
 
 SUB = QFont()
 SUB.setPointSize(15)
-SUB.setFamily('Garamond')
+SUB.setFamily('Times New Roman')
+
+BOOKFINDER = QFont()
+BOOKFINDER.setPointSize(22)
+BOOKFINDER.setFamily('Times New Roman')
+
 
 class WorkerSignal():
     pass
@@ -74,7 +80,6 @@ class StartWindow(QMainWindow):
 
     def createNavBar(self):
         subInterface = QVBoxLayout()
-
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText("Please enter an ISBN Number")
         self.searchBar.setFont(SUBTITLE)
@@ -84,6 +89,8 @@ class StartWindow(QMainWindow):
         searchButton.setFont(SUBTITLE)
         searchButton.clicked.connect(self.search)
         subInterface.addWidget(searchButton)
+
+        self.searchBar.returnPressed.connect(self.search)
 
         return subInterface
 
@@ -111,7 +118,7 @@ class MainWindow(QMainWindow):
     
         programName = QLabel('Book Finder')
         programName.setFixedWidth(150)
-        programName.setFont(SUB)
+        programName.setFont(BOOKFINDER)
         titleCard.addWidget(programName)
 
         return titleCard
@@ -120,19 +127,23 @@ class MainWindow(QMainWindow):
         navBar = QHBoxLayout()
 
         self.searchBar = QLineEdit()
+
         self.searchBar.setPlaceholderText('Please enter an ISBN Number')
         self.searchBar.setFont(SUB)
-        self.searchBar.setFixedSize(QSize(200, 50))
+        self.searchBar.setFixedSize(QSize(650, 50))
 
         searchButton = QPushButton('Search')
         searchButton.setFont(SUB)
+        searchButton.clicked.connect(self.search)
+
+        
         searchButton.setFixedSize(100, 55)
 
         titleCard = self._createTitleCard()
         navBar.addLayout(titleCard)
         navBar.addWidget(self.searchBar)
         navBar.addWidget(searchButton)
-        navBar.addSpacerItem(QSpacerItem(600, 50))
+        navBar.addSpacerItem(QSpacerItem(0, 50))
 
         return navBar
     
@@ -145,7 +156,7 @@ class MainWindow(QMainWindow):
         header.addWidget(bookTitle)
 
         subHeader = QGridLayout()
-        venders = 'Amazon-Barnes&Nobel-Books a Million'.split('-')
+        venders = 'Amazon-Barnes & Noble-Books a Million'.split('-')
         
         index = 0
         for vender in venders:
@@ -153,7 +164,7 @@ class MainWindow(QMainWindow):
             venderHead = QLabel(vender)
             venderHead.setFont(SUBTITLE)
             venderHead.setFixedSize(QSize(333, 100))
-            venderHead.setAlignment(Qt.AlignLeft)
+            venderHead.setAlignment(Qt.AlignCenter)
             subHeader.addWidget(venderHead, 1, index)
 
         header.addLayout(subHeader)
@@ -169,11 +180,16 @@ class MainWindow(QMainWindow):
                 formatLabel = QLabel(f'{item[0]}: {item[1]}')
                 formatLabel.setFont(SUB)
                 formatLabel.setFixedWidth(333)
-                formatLabel.setAlignment(Qt.AlignLeft)
+                formatLabel.setAlignment(Qt.AlignCenter)
                 stacks.addWidget(formatLabel, row, col)
                 row += 1
             col += 1
-        return stacks
+        
+        stacks.setAlignment(Qt.AlignCenter)
+        stacksLayout = QHBoxLayout()
+        stacksLayout.addLayout(stacks)
+
+        return stacksLayout
 
     def startLoading(self, isbn):
         self.setFixedSize(QSize(300, 300))
@@ -198,7 +214,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def search(self):
-        pass
+        isbn = self.searchBar.text()
+        self.startLoading(isbn)
 
 class Toggle(QMainWindow):
     def __init__(self, main: MainWindow):
@@ -232,6 +249,7 @@ if __name__ == '__main__':
     start.show()
 
     main = MainWindow()
+    main.show()
     start.setRelative(main)
 
     switch = Toggle(main)
