@@ -33,13 +33,6 @@ class Scraper(ABC):
     def parse(self) -> list[list[str]]:
         pass
 
-    def run(isbn):
-        Title(isbn)
-        Amazon(isbn)
-        Barnes(isbn)
-        Million(isbn)
-        # Google(isbn)
-
 class Amazon(Scraper):
     url = 'https://www.amazon.com/s?i=stripbooks&rh=p_66%3A{}&s=relevanceexprank&Adv-Srch-Books-Submit.x=36&Adv-Srch-Books-Submit.y=12&unfiltered=1&ref=sr_adv_b'
     
@@ -65,7 +58,7 @@ class Amazon(Scraper):
             By.CLASS_NAME,'a-size-base.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-bold')]
 
         for items in zip(types, wholes, fractions):
-            results.append([items[0], f'{items[1]}.{items[2]}'])
+            results.append([items[0], f'${items[1]}.{items[2]}'])
 
         return results
 

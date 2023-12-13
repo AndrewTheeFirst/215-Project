@@ -4,38 +4,38 @@ from PySide6.QtWidgets import QApplication, QMainWindow # UI handler
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QSpacerItem, QWidget # layout manipulation
 from PySide6.QtWidgets import QPushButton, QLabel, QLineEdit # widgets
 from PySide6.QtCore import QSize, Qt # sizing and alignment
-from PySide6.QtCore import QRunnable, QObject, QThreadPool, Signal, QThread # managing threads
+from PySide6.QtCore import QRunnable, Slot, QThreadPool, QObject, Signal # managing threads
 from PySide6.QtGui import QFont, QMovie, QPixmap # fonts, gifs, images
 import Scraper # data class
+from collections.abc import Callable # for reference, not used
 
 TITLE = QFont()
 TITLE.setPointSize(75)
-TITLE.setFamily('Garamond')
+TITLE.setFamily('Times New Roman')
 
 SUBTITLE = QFont()
 SUBTITLE.setPointSize(20)
-SUBTITLE.setFamily('Garamond')
+SUBTITLE.setFamily('Times New Roman')
 
 SUB = QFont()
 SUB.setPointSize(15)
-SUB.setFamily('Garamond')
+SUB.setFamily('Times New Roman')
 
-class WorkerSignal():
-    pass
+class Worker(QRunnable):
 
-class Worker(QObject):
-    def __init__(self, isbn):
-        super().__init__()
-        self.isbn = isbn
+    def __init__(self, toCall, arg):
+        self.toCall = toCall
+        self.arg = arg
+        self.signalz = WorkerSignal()
 
-    def task(self):
-        Scraper.Scraper.run(self.isbn)
 
-class Manager(QThread):
+    @Slot
+    def run(self):
+        self.toCall(self.arg)
+        self.signalz.finished.emit()    
 
-    def run(self, isbn):
-        worker = Worker(isbn)
-        worker.task()
+class WorkerSignal(QObject):
+    finished = Signal()
 
 class StartWindow(QMainWindow):
 
@@ -93,9 +93,22 @@ class StartWindow(QMainWindow):
         self.relative.startLoading(self.searchBar.text())
         
 class MainWindow(QMainWindow):
+    tasks: list[Worker] = []
 
     def __init__(self):
         super().__init__()
+        self.threadpool = QThreadPool()
+
+    def runTasks(self):
+        for task in MainWindow.tasks:
+            task.signalz.finished.connect(self.signalRecieved)
+            self.threadpool.start(task)
+
+    def signalRecieved(self):
+        MainWindow.signals += 1
+        if MainWindow.signals == 4:
+            MainWindow.signals = 0
+            self.stopLoading()
 
     def _createTitleCard(self) -> QHBoxLayout:
         titleCard = QHBoxLayout()
@@ -179,9 +192,11 @@ class MainWindow(QMainWindow):
         loadingContainer.setMovie(self.loading)
         self.setCentralWidget(loadingContainer)
         self.loading.start()
-        manager = Manager()
-        manager.run(isbn)
-        manager.finished.connect(self.stopLoading)
+
+        MainWindow.tasks.append(Worker(Scraper.Amazon, isbn))
+        MainWindow.tasks.append(Worker(Scraper.Barnes, isbn))
+        MainWindow.tasks.append(Worker(Scraper.Million, isbn))
+        manager.finished.connect(self.stopLoading)#####################
 
     def stopLoading(self): #########init of window##########
         self.loading.stop()
