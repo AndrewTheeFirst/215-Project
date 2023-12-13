@@ -1,5 +1,8 @@
 #Andrew Patton
 #Christopher Pillgreen
+#Setup Instructions: Install Selenium and Pyside6 using the following commands
+#pip install selenium
+#pip install PySide6
 from PySide6.QtWidgets import QApplication, QMainWindow # UI handler
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QSpacerItem, QWidget # layout manipulation
 from PySide6.QtWidgets import QPushButton, QLabel, QLineEdit # widgets
