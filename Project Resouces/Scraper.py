@@ -5,7 +5,6 @@ from selenium.webdriver.common.keys import Keys # automated key strokesv(unimple
 from selenium.webdriver.common.by import By # html locator tool
 from selenium.common.exceptions import NoSuchElementException # exception handling
 
-
 agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 OPTIONS = Options()
 OPTIONS.add_argument(f'user-agent={agent}')

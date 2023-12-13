@@ -4,6 +4,25 @@
 #pip install selenium
 #pip install PySide6
 
+# Nov 30: Experimenting with amazon
+# Dec 1: Simple Gui
+# Dec 4: Created simple Amazon Scraper concept
+# Dec 6: Added support for multiple formats on Amazon
+# Dec 6: Experimented with builtin python threading
+# Dec 7: Added Scraper ABC
+# Dec 8: More Thread Experimentation
+# Dec 8: Experimenting with Google Scraper
+# Dec 10: Large Changes to UI and Design (adding loading and logo)
+# Dec 11: Moved to QThreading
+# Dec 12: Completed Million Class, Implemented Headless
+# Dec 12: Unimplemented Google, Bug fixes and UI
+# Dec 13: Finished Implementing Multithreaded Scraping
+
+# Sources
+# https://doc.qt.io/qtforpython-6/
+# https://www.pythonguis.com/tutorials/multithreading-pyside6-applications-qthreadpool/
+
+
 from PySide6.QtWidgets import QApplication, QMainWindow # UI handler
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QSpacerItem, QWidget # layout manipulation
 from PySide6.QtWidgets import QPushButton, QLabel, QLineEdit # widgets
