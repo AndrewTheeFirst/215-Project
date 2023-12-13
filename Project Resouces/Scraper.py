@@ -116,7 +116,7 @@ class Barnes(Scraper):
         for price, book_type in zip(prices, types):
             results.append([book_type, price])
         if not results:
-            return ['No books found', '']
+            return [['No books found', '']]
         return results
 
 # attempted google class, but
@@ -174,7 +174,7 @@ class Million(Scraper):
         for price, book_type in zip(prices, types):
             results.append([book_type, price])
         if not results:
-            return ['No books found', '']
+            return [['No books found', '']]
         return results
 
 class Title(Scraper):

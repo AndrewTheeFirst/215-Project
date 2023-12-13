@@ -221,6 +221,7 @@ class MainWindow(QMainWindow):
         '''responsible for rendering data'''
         stacks = QGridLayout()
         col = 0
+        print(Scraper.Scraper.results)
         for vender in Scraper.Scraper.results.keys():
             row = 0
             for item in Scraper.Scraper.results[vender]:
