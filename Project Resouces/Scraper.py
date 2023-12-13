@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
-from threading import Thread
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.keys import Keys
+from selenium import webdriver # automation tool
+from selenium.webdriver.chrome.options import Options # custom chrome configs
+from selenium.webdriver.common.keys import Keys # automated key strokesv(unimplemented)
+from selenium.webdriver.common.by import By # html locator tool
+from selenium.common.exceptions import NoSuchElementException # exception handling
 
 
 agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -87,7 +85,6 @@ class Amazon(Scraper):
                         By.ID, 'tmmSwatches').find_element(
                         By.CLASS_NAME, 'a-size-base.a-color-price.a-color-price').text[1:])
                 except NoSuchElementException:
-                    print('has been reached')
                     prices.append('NULL')
 
             for pair in zip(formatNames, prices):
@@ -119,6 +116,8 @@ class Barnes(Scraper):
         types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'span-with-normal-white-space')]
         for price, book_type in zip(prices, types):
             results.append([book_type, price])
+        if not results:
+            return ['No books found', '']
         return results
 
 # attempted google class, but
@@ -175,6 +174,8 @@ class Million(Scraper):
         types = [type.text for type in self.driver.find_elements(By.CLASS_NAME, 'productInfoText')]
         for price, book_type in zip(prices, types):
             results.append([book_type, price])
+        if not results:
+            return ['No books found', '']
         return results
 
 class Title(Scraper):

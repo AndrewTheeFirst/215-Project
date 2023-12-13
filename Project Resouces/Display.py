@@ -1,16 +1,17 @@
 #Andrew Patton
 #Christopher Pillgreen
-#Setup Instructions: Install Selenium and Pyside6 using the following commands
+#Setup Instructions: Install Selenium and Pyside6 using the following commands:
 #pip install selenium
 #pip install PySide6
+
 from PySide6.QtWidgets import QApplication, QMainWindow # UI handler
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QSpacerItem, QWidget # layout manipulation
 from PySide6.QtWidgets import QPushButton, QLabel, QLineEdit # widgets
 from PySide6.QtCore import QSize, Qt # sizing and alignment
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, QObject, Signal # managing threads
 from PySide6.QtGui import QFont, QMovie, QPixmap # fonts, gifs, images
-import Scraper # data class
-from collections.abc import Callable # for reference, not used
+import Scraper # data module
+from collections.abc import Callable # for reference (typehints), not for use
 
 TITLE = QFont()
 TITLE.setPointSize(40)
@@ -30,24 +31,27 @@ BOOKFINDER.setFamily('Times New Roman')
 
 
 class Worker(QRunnable):
-
-    def __init__(self, toCall, arg):
+    '''queues a function with an argument to be called in a new thread'''
+    def __init__(self, toCall: Callable, arg, main: QMainWindow):
+        super().__init__()
         self.toCall = toCall
         self.arg = arg
-        self.signalz = WorkerSignal()
+        self.signals = WorkerSignal()
+        self.signals.finished.connect(main.signalRecieved)
 
-
-    @Slot
+    @Slot()
     def run(self):
         self.toCall(self.arg)
-        self.signalz.finished.emit()    
+        self.signals.finished.emit()    
 
 class WorkerSignal(QObject):
+    '''notifies helper methods when a task is complete'''
     finished = Signal()
 
 class StartWindow(QMainWindow):
 
     def __init__(self):
+        '''initializes user interface'''
         super().__init__()
         self.setFixedSize(QSize(650, 300))
 
@@ -63,7 +67,8 @@ class StartWindow(QMainWindow):
         widget.setLayout(mainInterface)
         self.setCentralWidget(widget)
 
-    def createTitleCard(self):
+    def createTitleCard(self) -> QHBoxLayout:
+        '''renders logo'''
         titleCard = QHBoxLayout()
 
         image = QPixmap('Project Resouces\\bookStackIcon.png')
@@ -77,7 +82,8 @@ class StartWindow(QMainWindow):
         titleCard.addWidget(programName)
         return titleCard
 
-    def createNavBar(self):
+    def createNavBar(self) -> QVBoxLayout:
+        '''responsible for rendering search bar and button'''
         subInterface = QVBoxLayout()
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText("Please enter an ISBN Number")
@@ -93,33 +99,40 @@ class StartWindow(QMainWindow):
 
         return subInterface
 
-    def setRelative(self, relative: 'MainWindow'):
+    def setRelative(self, relative: QMainWindow):
+        '''responsible for linking starting window to main window'''
         self.relative = relative
 
     def search(self):
-        self.relative.show()
-        self.hide()
-        self.relative.startLoading(self.searchBar.text())
+        '''initiates search for books. (connected to search button)'''
+        isbn = self.searchBar.text()
+        if isbn:
+            self.relative.show()
+            self.hide()
+            self.relative.startLoading(isbn)
         
 class MainWindow(QMainWindow):
     tasks: list[Worker] = []
+    signals = 0
 
     def __init__(self):
         super().__init__()
         self.threadpool = QThreadPool()
 
     def runTasks(self):
+        '''runs queued tasks'''
         for task in MainWindow.tasks:
-            task.signalz.finished.connect(self.signalRecieved)
             self.threadpool.start(task)
 
     def signalRecieved(self):
+        '''tracks when tasks are completed'''
         MainWindow.signals += 1
         if MainWindow.signals == 4:
             MainWindow.signals = 0
             self.stopLoading()
 
     def _createTitleCard(self) -> QHBoxLayout:
+        '''renders logo'''
         titleCard = QHBoxLayout()
 
         image = QPixmap('Project Resouces\\bookStackIcon.png')
@@ -136,6 +149,7 @@ class MainWindow(QMainWindow):
         return titleCard
     
     def _createNavBar(self) -> QHBoxLayout:
+        '''responsible for rendering search bar and button'''
         navBar = QHBoxLayout()
 
         self.searchBar = QLineEdit()
@@ -159,7 +173,8 @@ class MainWindow(QMainWindow):
 
         return navBar
     
-    def _createHeader(self) -> QHBoxLayout:
+    def _createHeader(self) -> QVBoxLayout:
+        '''responsible for rendering header'''
         header = QVBoxLayout() 
 
         bookTitle = QLabel(Scraper.Scraper.title)
@@ -184,6 +199,7 @@ class MainWindow(QMainWindow):
         return header
 
     def _createStacks(self) -> QHBoxLayout:
+        '''responsible for rendering data'''
         stacks = QGridLayout()
         col = 0
         for vender in Scraper.Scraper.results.keys():
@@ -203,20 +219,23 @@ class MainWindow(QMainWindow):
 
         return stacksLayout
 
-    def startLoading(self, isbn):
+    def startLoading(self, isbn: str | int):
+        '''queues up and runs tasks and displays loading animation'''
         self.setFixedSize(QSize(300, 300))
         self.loading = QMovie('Project Resouces\\loading.gif')
         loadingContainer = QLabel()
         loadingContainer.setMovie(self.loading)
         self.setCentralWidget(loadingContainer)
         self.loading.start()
+        MainWindow.tasks = []
+        MainWindow.tasks.append(Worker(Scraper.Title, isbn, self))
+        MainWindow.tasks.append(Worker(Scraper.Amazon, isbn, self))
+        MainWindow.tasks.append(Worker(Scraper.Barnes, isbn, self))
+        MainWindow.tasks.append(Worker(Scraper.Million, isbn, self))
+        self.runTasks()
 
-        MainWindow.tasks.append(Worker(Scraper.Amazon, isbn))
-        MainWindow.tasks.append(Worker(Scraper.Barnes, isbn))
-        MainWindow.tasks.append(Worker(Scraper.Million, isbn))
-        manager.finished.connect(self.stopLoading)#####################
-
-    def stopLoading(self): #########init of window##########
+    def stopLoading(self):
+        '''renders, resizes, and displays data on page'''
         self.loading.stop()
         self.setFixedSize(1000, 500)
         mainInterface = QVBoxLayout()
@@ -228,47 +247,26 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def search(self):
+        '''initiates search for books. (connected to search button)'''
         isbn = self.searchBar.text()
-        self.startLoading(isbn)
-
-class Toggle(QMainWindow):
-    def __init__(self, main: MainWindow):
-        super().__init__()
-        layout = QVBoxLayout()
-
-        self.main = main
-
-        onButton = QPushButton('on')
-        onButton.clicked.connect(self.on)
-        layout.addWidget(onButton)
-
-        offButton = QPushButton('off')
-        offButton.clicked.connect(self.off)
-        layout.addWidget(offButton)
-
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-
-    def on(self):
-        self.main.startLoading()
-
-    def off(self):
-        self.main.stopLoading()
+        if isbn:
+            self.startLoading(isbn)
 
 if __name__ == '__main__':
     app = QApplication()
 
     start = StartWindow()
+    main = MainWindow()
+
+    start.setRelative(main)
     start.show()
 
-    main = MainWindow()
-    main.show()
-    start.setRelative(main)
-
-    switch = Toggle(main)
-    switch.show()
-
     app.exec()
+
+    # example isbns
+
     # 9780062024022
     # 9780199608522
+    # 9781603095020
+    # 9781603095174
+    # 9781603095273
