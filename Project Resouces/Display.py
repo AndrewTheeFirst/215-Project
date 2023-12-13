@@ -33,7 +33,7 @@ import Scraper # data module
 from collections.abc import Callable # for reference (typehints), not for use
 
 TITLE = QFont()
-TITLE.setPointSize(40)
+TITLE.setPointSize(75)
 TITLE.setFamily('Times New Roman')
 
 SUBTITLE = QFont()
@@ -47,6 +47,10 @@ SUB.setFamily('Times New Roman')
 BOOKFINDER = QFont()
 BOOKFINDER.setPointSize(22)
 BOOKFINDER.setFamily('Times New Roman')
+
+MAINTITLE = QFont()
+MAINTITLE.setPointSize(40)
+MAINTITLE.setFamily('Times New Roman')
 
 
 class Worker(QRunnable):
@@ -189,6 +193,7 @@ class MainWindow(QMainWindow):
         navBar.addWidget(self.searchBar)
         navBar.addWidget(searchButton)
         navBar.addSpacerItem(QSpacerItem(0, 50))
+        self.searchBar.returnPressed.connect(self.search)
 
         return navBar
     
@@ -197,7 +202,7 @@ class MainWindow(QMainWindow):
         header = QVBoxLayout() 
 
         bookTitle = QLabel(Scraper.Scraper.title)
-        bookTitle.setFont(TITLE)
+        bookTitle.setFont(MAINTITLE)
         bookTitle.setAlignment(Qt.AlignCenter)
         header.addWidget(bookTitle)
 
