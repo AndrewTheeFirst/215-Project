@@ -105,7 +105,6 @@ class Barnes(Scraper):
     def search(self, isbn: int) -> None:
         '''initializes page'''
         self.driver.get(Barnes.url)
-        self.driver.get_screenshot_as_file("screenshot.png")
         searchBar = self.driver.find_element(By.TAG_NAME, 'nav').find_element(By.TAG_NAME, 'input')
         searchBar.send_keys(str(isbn))
         button = self.driver.find_element(By.CLASS_NAME,'btn.btn-outline-secondary.rhf-search-btn')
