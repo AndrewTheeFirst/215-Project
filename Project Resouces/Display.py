@@ -142,14 +142,14 @@ class MainWindow(QMainWindow):
         header.addWidget(bookTitle)
 
         subHeader = QGridLayout()
-        venders = 'Amazon-Barnes&Nobel-Books a Million-Google'.split('-')
+        venders = 'Amazon-Barnes&Nobel-Books a Million'.split('-')
         
         index = 0
         for vender in venders:
             index += 1
             venderHead = QLabel(vender)
             venderHead.setFont(SUBTITLE)
-            venderHead.setFixedSize(QSize(250, 100))
+            venderHead.setFixedSize(QSize(333, 100))
             venderHead.setAlignment(Qt.AlignLeft)
             subHeader.addWidget(venderHead, 1, index)
 
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
             for item in Scraper.Scraper.results[vender]:
                 formatLabel = QLabel(f'{item[0]}: {item[1]}')
                 formatLabel.setFont(SUB)
-                formatLabel.setFixedWidth(250)
+                formatLabel.setFixedWidth(333)
                 formatLabel.setAlignment(Qt.AlignLeft)
                 stacks.addWidget(formatLabel, row, col)
                 row += 1
@@ -196,7 +196,6 @@ class MainWindow(QMainWindow):
 
     def search(self):
         pass
-
 
 class Toggle(QMainWindow):
     def __init__(self, main: MainWindow):
